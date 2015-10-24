@@ -1,0 +1,18 @@
+<document>
+    <title>My Test PDF</title>
+    <subtitle>Version 1.0</subtitle>
+    <titleImage>https://maven.apache.org/images/maven-logo-black-on-white.png</titleImage>
+    
+    <leftHeader>${title}</leftHeader>
+    <rightHeader>${subtitle}</rightHeader>
+    <leftFooter>(c) ${year} ZCarioca Company</leftFooter>
+    <rightFooter>${page}</rightFooter>
+    
+    <toc>
+        <item file="introduction"/>
+        <item file="codeblocks"/>
+        <item file="lists"/>
+        <item file="more"/>
+        <item file="conclusion"/>
+    </toc>
+</document>
