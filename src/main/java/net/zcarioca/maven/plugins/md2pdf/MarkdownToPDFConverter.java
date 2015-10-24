@@ -14,14 +14,17 @@ import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.ast.RootNode;
 
+import net.zcarioca.maven.plugins.md2pdf.pdf.PDFDocument;
+import net.zcarioca.maven.plugins.md2pdf.pdf.PDFDocumentFactory;
+
 public class MarkdownToPDFConverter {
 
-    private final PDFFileStructure markdownContent;
+    private final PDFDocument markdownContent;
     private final File pdfFile;
     private final Log log;
 
     public MarkdownToPDFConverter(final File markdownXmlFile, final File markdownDir, final File outputDir, final Log log) throws IOException {
-        this.markdownContent = PDFFileStructure.fromXML(markdownXmlFile, markdownDir);
+        this.markdownContent = PDFDocumentFactory.createFromXML(markdownXmlFile, markdownDir, outputDir);
         this.pdfFile = new File(outputDir, markdownXmlFile.getName().substring(0, markdownXmlFile.getName().lastIndexOf(".")) + ".pdf");
         this.log = log;
     }
@@ -36,7 +39,7 @@ public class MarkdownToPDFConverter {
     String generateMarkdown() {
         final StringWriter writer = new StringWriter();
 
-        for (final File markdownFile : this.markdownContent.getTocItems()) {
+        for (final File markdownFile : this.markdownContent.getMarkdownFiles()) {
             InputStream inputStream = null;
             try {
                 inputStream = new BufferedInputStream(new FileInputStream(markdownFile));
@@ -75,7 +78,7 @@ public class MarkdownToPDFConverter {
                 Extensions.TABLES | Extensions.DEFINITIONS | Extensions.FENCED_CODE_BLOCKS | Extensions.STRIKETHROUGH |
                 Extensions.ANCHORLINKS | Extensions.ALL_OPTIONALS | Extensions.FORCELISTITEMPARA);
 
-        for (final File markdownFile : this.markdownContent.getTocItems()) {
+        for (final File markdownFile : this.markdownContent.getMarkdownFiles()) {
             InputStream inputStream = null;
             try {
                 inputStream = new BufferedInputStream(new FileInputStream(markdownFile));

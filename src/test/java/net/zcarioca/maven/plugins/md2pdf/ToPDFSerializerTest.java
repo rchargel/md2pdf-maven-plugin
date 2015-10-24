@@ -9,18 +9,21 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
+import net.zcarioca.maven.plugins.md2pdf.pdf.PDFDocument;
+import net.zcarioca.maven.plugins.md2pdf.pdf.PDFDocumentFactory;
+
 public class ToPDFSerializerTest extends AbstractTestHarness {
 
     private MarkdownToPDFConverter converter;
     private ToPDFSerializer serializer;
-    private PDFFileStructure pdfData;
+    private PDFDocument pdfData;
 
     @Override
     @Before
     public void setup() {
         super.setup();
         try {
-            this.pdfData = PDFFileStructure.fromXML(markdownXmlFile, markdownDirectory);
+            this.pdfData = PDFDocumentFactory.createFromXML(markdownXmlFile, markdownDirectory, outputDir);
             this.converter = new MarkdownToPDFConverter(markdownXmlFile, markdownDirectory, outputDir, log);
             this.serializer = new ToPDFSerializer(pdfData, converter.parseMarkdown());
         } catch (final IOException exc) {
