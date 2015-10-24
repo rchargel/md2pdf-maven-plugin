@@ -12,9 +12,7 @@
     <description>Converts markdown documents to PDF without the use of Pandoc or LaTeX</description>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
-
     <url>http://www.zcarioca.net</url>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jaxb.version>2.2.11</jaxb.version>
