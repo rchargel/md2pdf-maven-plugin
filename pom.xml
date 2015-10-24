@@ -16,6 +16,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jaxb.version>2.2.11</jaxb.version>
+        <xjc.plugin.version>2.3.0</xjc.plugin.version>
     </properties>
     <licenses>
         <license>
@@ -115,6 +116,53 @@
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-xjc-plugin</artifactId>
+                <version>${xjc.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>xsdtojava</goal>
+                        </goals>
+                        <configuration>
+                            <sourceRoot>target/generated-sources/main/java</sourceRoot>
+                            <xsdOptions>
+                                <xsdOption>
+                                    <xsd>src/main/resources/schema/document-1.0.1.xsd</xsd>
+                                    <packagename>net.zcarioca.maven.plugins.md2pdf.doc</packagename>
+                                </xsdOption>
+                            </xsdOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <extensions>
+                        <extension>org.apache.cxf.xjcplugins:cxf-xjc-dv:${xjc.plugin.version}</extension>
+                    </extensions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.9.1</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/main/java/</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

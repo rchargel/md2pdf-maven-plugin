@@ -1,18 +1,30 @@
-<document>
-    <title>My Test PDF</title>
-    <subtitle>Version 1.0</subtitle>
-    <titleImage>https://maven.apache.org/images/maven-logo-black-on-white.png</titleImage>
-    
-    <leftHeader>${title}</leftHeader>
-    <rightHeader>${subtitle}</rightHeader>
-    <leftFooter>(c) ${year} ZCarioca Company</leftFooter>
-    <rightFooter>${page}</rightFooter>
-    
+<document xmlns="http://maven.apache.org/DOCUMENT/1.0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/DOCUMENT/1.0.1 http://maven.apache.org/xsd/document-1.0.1.xsd" outputName="outputfile">
+
+    <meta>
+        <author>ZCarioca</author>
+        <creator>My Company</creator>
+        <creationdate>2015-10-25</creationdate>
+        <description>This is a test document</description>
+        <title>My Test Document</title>
+    </meta>
+
+    <cover>
+        <author>My Name</author>
+        <companyName>My Company Name</companyName>
+        <companyLogo>https://maven.apache.org/images/maven-logo-black-on-white.png</companyLogo>
+        <coverTitle>My Test Document</coverTitle>
+        <coverSubTitle>A cool document</coverSubTitle>
+        <coverVersion>1.0</coverVersion>
+        <projectName>Maven Test Project</projectName>
+        <projectLogo>http://www.rutzenholzer.eu/static/pic/git.png</projectLogo>
+    </cover>
+
     <toc>
-        <item file="introduction"/>
-        <item file="codeblocks"/>
-        <item file="lists"/>
-        <item file="more"/>
-        <item file="conclusion"/>
+        <item name="Doesn't Matter" ref="introduction" />
+        <item ref="codeblocks" />
+        <item ref="lists" />
+        <item ref="more" />
+        <item ref="conclusion" />
     </toc>
 </document>

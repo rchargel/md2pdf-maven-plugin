@@ -60,8 +60,10 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import net.zcarioca.maven.plugins.md2pdf.pdf.PDFDocument;
+
 class ToPDFSerializer implements Visitor {
-    private final PDFFileStructure pdfData;
+    private final PDFDocument pdfData;
     private final RootNode rootNode;
     private final Font textFont;
     private final Font codeFont;
@@ -73,7 +75,7 @@ class ToPDFSerializer implements Visitor {
     private PdfWriter writer;
     private OutputStream outputStream;
 
-    ToPDFSerializer(final PDFFileStructure pdfFileStructure, final RootNode rootNode) {
+    ToPDFSerializer(final PDFDocument pdfFileStructure, final RootNode rootNode) {
         this.pdfData = pdfFileStructure;
         this.rootNode = rootNode;
 
@@ -103,8 +105,10 @@ class ToPDFSerializer implements Visitor {
     }
 
     private void writeFrontPage() throws DocumentException {
-        this.document.addCreationDate();
-        this.document.addTitle(pdfData.getTitle());
+        this.document.addTitle(pdfData.getMetaData().getTitle());
+        this.document.addAuthor(pdfData.getMetaData().getAuthor());
+        this.document.addCreator(pdfData.getMetaData().getCompany());
+        this.document.addSubject(pdfData.getMetaData().getDescription());
 
         final PdfPTable table = new PdfPTable(1);
         table.setWidthPercentage(100);
@@ -115,12 +119,12 @@ class ToPDFSerializer implements Visitor {
         c.setVerticalAlignment(Element.ALIGN_MIDDLE);
         c.setMinimumHeight(document.getPageSize().getHeight() - (document.bottomMargin() + document.topMargin()));
 
-        final Paragraph title = new Paragraph(this.pdfData.getTitle(), this.titleFont);
+        final Paragraph title = new Paragraph(this.pdfData.getCover().getTitle(), this.titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         c.addElement(title);
         c.addElement(new Paragraph(" ", this.titleFont));
-        if (StringUtils.isNotBlank(pdfData.getSubtitle())) {
-            final Paragraph subtitle = new Paragraph(pdfData.getSubtitle(), this.subTitleFont);
+        if (StringUtils.isNotBlank(pdfData.getCover().getSubTitle())) {
+            final Paragraph subtitle = new Paragraph(pdfData.getCover().getSubTitle(), this.subTitleFont);
             subtitle.setAlignment(Element.ALIGN_CENTER);
             c.addElement(subtitle);
         }
