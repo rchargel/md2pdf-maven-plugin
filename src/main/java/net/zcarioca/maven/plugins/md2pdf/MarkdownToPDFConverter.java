@@ -55,7 +55,7 @@ public class MarkdownToPDFConverter {
         return writer.toString();
     }
 
-    RootNode parseMarkdown() {
+    public RootNode parseMarkdown() {
         final PegDownProcessor processor = new PegDownProcessor(Extensions.ABBREVIATIONS | Extensions.AUTOLINKS |
                 Extensions.TABLES | Extensions.DEFINITIONS | Extensions.FENCED_CODE_BLOCKS | Extensions.STRIKETHROUGH |
                 Extensions.ANCHORLINKS | Extensions.ALL_OPTIONALS | Extensions.FORCELISTITEMPARA);

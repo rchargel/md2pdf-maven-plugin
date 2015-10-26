@@ -1,4 +1,4 @@
-package net.zcarioca.maven.plugins.md2pdf;
+package net.zcarioca.maven.plugins.md2pdf.pdf;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -9,8 +9,11 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
+import net.zcarioca.maven.plugins.md2pdf.AbstractTestHarness;
+import net.zcarioca.maven.plugins.md2pdf.MarkdownToPDFConverter;
 import net.zcarioca.maven.plugins.md2pdf.pdf.PDFDocument;
 import net.zcarioca.maven.plugins.md2pdf.pdf.PDFDocumentFactory;
+import net.zcarioca.maven.plugins.md2pdf.pdf.ToPDFSerializer;
 
 public class ToPDFSerializerTest extends AbstractTestHarness {
 
