@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static net.zcarioca.maven.plugins.md2pdf.pdf.PDFUtils.createCell;
 import static net.zcarioca.maven.plugins.md2pdf.pdf.PDFUtils.createParagraph;
 import static net.zcarioca.maven.plugins.md2pdf.pdf.PDFUtils.createSpacerParagraph;
+import static net.zcarioca.maven.plugins.md2pdf.pdf.PDFUtils.getModifiedFont;
 import static net.zcarioca.maven.plugins.md2pdf.pdf.PDFUtils.loadImageByURL;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -14,15 +15,21 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.pegdown.ast.AnchorLinkNode;
+import org.pegdown.ast.CodeNode;
+import org.pegdown.ast.ExpLinkNode;
 import org.pegdown.ast.HeaderNode;
 import org.pegdown.ast.Node;
 import org.pegdown.ast.ParaNode;
 import org.pegdown.ast.RootNode;
 import org.pegdown.ast.SimpleNode;
+import org.pegdown.ast.SpecialTextNode;
 import org.pegdown.ast.StrongEmphSuperNode;
 import org.pegdown.ast.SuperNode;
 import org.pegdown.ast.TextNode;
 
+import com.itextpdf.text.Anchor;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chapter;
 import com.itextpdf.text.Chunk;
@@ -30,11 +37,10 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Font.FontFamily;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Section;
-import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -57,6 +63,8 @@ public class ToPDFSerializer extends AbstractVisitor {
     private Chapter chapter;
     private Section section;
     private Paragraph paragraph;
+    private Anchor anchor;
+    private Font currentFont;
     private float pageHeight;
     private float pageWidth;
     private int chapterNumber = 1;
@@ -65,11 +73,11 @@ public class ToPDFSerializer extends AbstractVisitor {
         this.pdfData = pdfFileStructure;
         this.rootNode = rootNode;
 
-        this.textFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
-        this.codeFont = FontFactory.getFont(FontFactory.COURIER, 10);
-        this.titleFont = FontFactory.getFont(FontFactory.HELVETICA, 24, Font.BOLD);
-        this.subTitleFont = FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD);
-        this.smallFont = FontFactory.getFont(FontFactory.HELVETICA, 8, Font.ITALIC);
+        this.textFont = new Font(FontFamily.HELVETICA, 10);
+        this.codeFont = new Font(FontFamily.COURIER, 10);
+        this.titleFont = new Font(FontFamily.HELVETICA, 24, Font.BOLD);
+        this.subTitleFont = new Font(FontFamily.HELVETICA, 16, Font.BOLD);
+        this.smallFont = new Font(FontFamily.HELVETICA, 8, Font.ITALIC);
     }
 
     public void printPDF(final File outputFile) throws IOException {
@@ -169,21 +177,55 @@ public class ToPDFSerializer extends AbstractVisitor {
     }
 
     @Override
+    public void visit(final AnchorLinkNode node) {
+        if (StringUtils.isNotBlank(node.getName())) {
+            this.anchor = new Anchor();
+            if (this.paragraph != null) {
+                this.anchor.setFont(this.currentFont);
+            }
+            anchor.setName(node.getName());
+        }
+    }
+
+    @Override
     public void visit(final StrongEmphSuperNode node) {
         if (node.isClosed()) {
-            if (this.paragraph != null) {
-                this.paragraph.add(getAndClearPrinter());
-                final BaseFont baseFont = paragraph.getFont().getBaseFont();
+            if (this.inPara()) {
+                append(getAndClearPrinter());
                 Font font = null;
                 if (node.isStrong()) {
-                    font = new Font(baseFont, paragraph.getFont().getSize(), baseFont.getFontType() | Font.BOLD);
+                    font = getModifiedFont(currentFont, Font.BOLD, null);
                 } else {
-                    font = new Font(baseFont, paragraph.getFont().getSize(), baseFont.getFontType() | Font.ITALIC);
+                    font = getModifiedFont(currentFont, Font.ITALIC, null);
                 }
+                final Font oldFont = this.currentFont;
+                this.currentFont = font;
                 visitChildren(node);
-                this.paragraph.add(new Chunk(getAndClearPrinter(), font));
+                append(new Chunk(getAndClearPrinter(), font));
+                this.currentFont = oldFont;
             } else {
                 log.warn("No paragraph available");
+            }
+        } else {
+            visitChildren(node);
+        }
+    }
+
+    @Override
+    public void visit(final ExpLinkNode node) {
+        final String url = node.url;
+        if (StringUtils.isNotBlank(url)) {
+            if (this.inPara()) {
+                append(getAndClearPrinter());
+                final Font hyperlinkFont = getModifiedFont(this.paragraph.getFont(), Font.UNDERLINE, BaseColor.BLUE);
+                if (url.startsWith("#")) {
+                    final Anchor link = new Anchor();
+                    link.setFont(hyperlinkFont);
+                    link.setReference(url);
+                    visitChildren(node);
+                    link.add(getAndClearPrinter());
+                    append(link);
+                }
             }
         } else {
             visitChildren(node);
@@ -194,6 +236,7 @@ public class ToPDFSerializer extends AbstractVisitor {
     public void visit(final ParaNode node) {
         this.paragraph = new Paragraph();
         this.paragraph.setFont(textFont);
+        this.currentFont = textFont;
         this.paragraph.setLeading(20f);
 
         visitChildren(node);
@@ -206,9 +249,10 @@ public class ToPDFSerializer extends AbstractVisitor {
     public void visit(final SimpleNode node) {
         switch (node.getType()) {
             case HRule:
-                final LineSeparator line = new LineSeparator(1, 100, BaseColor.BLACK, Element.ALIGN_CENTER, 15);
-                final Paragraph p = new Paragraph(20);
+                final LineSeparator line = new LineSeparator(1, 100, BaseColor.BLACK, Element.ALIGN_CENTER, 25);
+                final Paragraph p = new Paragraph(40);
                 p.add(line);
+                p.setSpacingAfter(15);
                 this.section.add(p);
                 break;
             default:
@@ -218,18 +262,34 @@ public class ToPDFSerializer extends AbstractVisitor {
     }
 
     @Override
+    public void visit(final SpecialTextNode node) {
+        printer.print(node.getText());
+    }
+
+    @Override
+    public void visit(final CodeNode node) {
+        append(getAndClearPrinter());
+        this.currentFont = codeFont;
+        append(new Chunk(node.getText(), codeFont));
+    }
+
+    @Override
     public void visit(final HeaderNode node) {
         final int level = node.getLevel();
         final int fontSize = 18 - ((level - 1) * 2);
         final String title = getTextContent(node);
-        final Font font = FontFactory.getFont(FontFactory.HELVETICA, fontSize, Font.BOLD);
+        final Font font = new Font(FontFamily.HELVETICA, fontSize, Font.BOLD);
 
         this.paragraph = new Paragraph();
         this.paragraph.setFont(font);
         this.paragraph.setLeading(30f - ((level - 1) * 2));
+        this.currentFont = font;
 
         visitChildren(node);
-        this.paragraph.add(getAndClearPrinter());
+        if (this.anchor != null) {
+            this.paragraph.add(anchor);
+        }
+        append(getAndClearPrinter());
 
         if (level == 1) {
             createChapter();
@@ -245,6 +305,8 @@ public class ToPDFSerializer extends AbstractVisitor {
             this.sectionsByLevel[level - 1] = section;
             this.section = section;
         }
+        this.anchor = null;
+        this.paragraph = null;
     }
 
     protected String getTextContent(final SuperNode node) {
@@ -279,4 +341,25 @@ public class ToPDFSerializer extends AbstractVisitor {
             printer.clear();
         }
     }
+
+    private boolean inPara() {
+        return this.anchor != null || this.paragraph != null;
+    }
+
+    private void append(final Element element) {
+        if (this.anchor != null) {
+            this.anchor.add(element);
+        } else {
+            this.paragraph.add(element);
+        }
+    }
+
+    private void append(final String text) {
+        if (this.anchor != null) {
+            this.anchor.add(text);
+        } else {
+            this.paragraph.add(text);
+        }
+    }
+
 }

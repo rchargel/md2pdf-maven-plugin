@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
@@ -51,6 +52,18 @@ public class PDFUtils {
         } catch (final MalformedURLException exc) {
             throw new IOException("Malformed URL: " + url, exc);
         }
+    }
+
+    public static Font getModifiedFont(final Font originalFont, final Integer style, final BaseColor color) {
+        final Font newFont = new Font(originalFont);
+        final int currentStyle = Math.max(0, originalFont.getStyle());
+        if (style != null) {
+            newFont.setStyle(currentStyle | style.intValue());
+        }
+        if (color != null) {
+            newFont.setColor(color);
+        }
+        return newFont;
     }
 
 }

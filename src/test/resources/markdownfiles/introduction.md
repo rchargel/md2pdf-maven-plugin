@@ -25,4 +25,4 @@ Wait, one more
 
 ---
 
-Quick, show me a copyright symbol (C)
+Quick, show me a copyright symbol ©

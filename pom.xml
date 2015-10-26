@@ -20,9 +20,9 @@
     </properties>
     <licenses>
         <license>
-            <name>GPL</name>
+            <name>MIT</name>
             <distribution>manual</distribution>
-            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+            <url>http://opensource.org/licenses/MIT</url>
         </license>
     </licenses>
     <scm>
@@ -35,6 +35,13 @@
         <name>zcarioca.net</name>
         <url>http://zcarioca.net</url>
     </organization>
+    <developers>
+        <developer>
+            <name>Rafael Chargel</name>
+            <organization>zcarioca.net</organization>
+            <organizationUrl>http://zcarioca.net</organizationUrl>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>

@@ -81,7 +81,7 @@ public abstract class AbstractVisitor implements Visitor {
 
     @Override
     public void visit(final CodeNode node) {
-        log.debug(node.getClass().getSimpleName());
+        log.debug(node.getClass().getSimpleName() + ": " + node.getText());
     }
 
     @Override
@@ -200,7 +200,7 @@ public abstract class AbstractVisitor implements Visitor {
 
     @Override
     public void visit(final SpecialTextNode node) {
-        log.debug(node.getClass().getSimpleName());
+        log.debug(node.getClass().getSimpleName() + ": " + node.getText());
 
     }
 
@@ -260,7 +260,7 @@ public abstract class AbstractVisitor implements Visitor {
 
     @Override
     public void visit(final VerbatimNode node) {
-        log.debug(node.getClass().getSimpleName());
+        log.debug(node.getClass().getSimpleName() + " [" + node.getType() + "]: " + node.getText());
 
     }
 
