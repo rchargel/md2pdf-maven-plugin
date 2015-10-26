@@ -9,10 +9,10 @@ import org.junit.Before;
 
 public class AbstractTestHarness {
 
-    File markdownXmlFile;
-    File markdownDirectory;
-    File outputDir;
-    Log log;
+    protected File markdownXmlFile;
+    protected File markdownDirectory;
+    protected File outputDir;
+    protected Log log;
 
     @Before
     public void setup() {
